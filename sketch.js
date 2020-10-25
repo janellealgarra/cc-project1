@@ -1,3 +1,5 @@
+
+//only this sketch and scene_3 will be in the final project. Still working on organization bc it's loading too slow when it's not all in one file 
 let cells = [];
 let num_cell = 1;
 

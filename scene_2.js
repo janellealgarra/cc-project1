@@ -1,5 +1,5 @@
 
-//Work in progress
+//Abandoned sketch --> original idea but found a better way in sketch_03
 
 let stem_one;
 let stem_two;
