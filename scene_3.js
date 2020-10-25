@@ -1,10 +1,26 @@
 /*Thing I still have to troubleshoot:
-- Frame rate changes overall after cells collide (frame rate found in Planets class)
-- setTimeout/setInterval not working --> still need to find a way to use time as an element for when the frames play
-- opacity of stars not working :c (line 266)
-- pattern_2 not showing properly (but it works)
--line 259??
-- Final step: adding this with the other code + keyboard press to switch between scenes + efficiency check?
+
+JUST AN FYI, NOTHING IS CONNECT ATM. WILL FIX TOMORROW. JUST NEEDED THE CODE THE WORK AS I WANTED IT TO FIRST
+
+//also, deleted scene 2 because it's discarded
+// FINALLY FIXED THE CODE
+
+PROBLEMS RESOLVED:
+1. Frame rate changing after collision ---> fixed in line 151 by setting the frame rate back to 60FPS which is the standard FPS for p5
+
+2. Planning the timing of the frames --> I couldn't use setTimeout/setInterval especially with the cells slowing down at collision.
+Made boolean statements instead Lines 74-133 (also made it loop again after it is done, might try to fix that into an actually while
+or for loop if possible but this is the best solution I could think of)
+
+3.opacity of stars not working --> it was so tiny I didn't realize there was a stroke so I just turned that off ahha silly me
+
+4. pattern_2 not showing properly --> HARDEST ONE!!! It worked the first time around but not the second time. Also in previous codes
+it would only show the outer rim. Made another boolean under the variable "bg" and set it to true when I want the background reset and
+false when I don't. But another problem was that the pattern only played the first time the loop ran. Realized I just needed to reset n
+ counter in the equation.
+
+
+- Final steps: adding the other code with keyboard press to switch between scenes + efficiency check?
 - Extra: code slows down for some reason when I organize it into diff but connected files...
 
 */
@@ -35,14 +51,18 @@ let stars = 1000;
 let n = 0;
 let c = 4;
 
+//for checking state (to play one by one)
+let frame1 = true, frame2 = false, frame3 = false;
+let start1 = false, start2 = false, start3 = false;
+
+
 function setup() {
   createCanvas(1200, 800);
+  //Branch(x, y, vx, vy)
   cell_1 = new Branch(0, 400,3,0);
   cell_2 = new Branch(width, 400,-3,0);
-  //cell_3 = new Branch(600, 0, 0,5);
-  //cell_4 = new Branch(600, 800,0,-5);
-  cell_3 = new Branch(600, -2400, 0,5);
-  cell_4 = new Branch(600, 3200,0,-5); //Manual timer
+  cell_3 = new Branch(600, 0, 0,5);
+  cell_4 = new Branch(600, 800,0,-5);
   cell_5 = new Branch(0, 0, 6, 4);
   cell_6 = new Branch(0, 800, 6,-4);
   cell_7 = new Branch(1200, 800,-6,-4);
@@ -51,51 +71,99 @@ function setup() {
   planets = new Planets();
 
 }
+let bg = true; //trying to figure out phyllotaxis problem but it doesnt run a second time around the loop
 
 function draw() {
-  background(0);// --> commenting out this lets pattern 2 be seen but then the cells repeat bc background is not redrawn. cool effect though
+  if(bg == true)
+    background(0);//
 
   phase(); //Function call for comparison in
-  //Still trying to find a way to play the scene one by one
 
-  /* //FIRST FRAME
-  cell_1.show();
-  cell_2.show();
-  cell_1.move();
-  cell_2.move();
+//--------FOR ONE BY ONE SCENE PLAY --------//
+  if(frame1==true) {
+    //FIRST FRAME
+    cell_1.show();
+    cell_2.show();
+    cell_1.move();
+    cell_2.move();
 
-  //setTimeout(frame_2, 3000); // Not working?? Line 233
+    //If frame 1 has started
+    if(start1 == true && cell_1.x >= width && cell_2.x <= 0) {
+      frame2 = true;
+    }
+  }
 
-  //SECOND FRAME
-  cell_3.show();
-  cell_4.show();
-  cell_3.move();
-  cell_4.move();
- */
+  if(frame2 == true) {
+    //SECOND FRAME
+    cell_3.show();
+    cell_4.show();
+    cell_3.move();
+    cell_4.move();
+    if(start2 == true && cell_3.y >= height + 60 && cell_4.y <= -60) {
+      frame3 = true;
+      //print("cell1:" + cell_3.y) --> checking to see location
+    }
+  }
 
-   //THIRD FRAME
-  cell_5.show();
-  cell_5.move();
-  cell_6.show();
-  cell_6.move();
-  cell_7.show();
-  cell_7.move();
-  cell_8.show();
-  cell_8.move();
+  if(frame3==true) {
+    //THIRD FRAME
+    cell_5.show();
+    cell_5.move();
+    cell_6.show();
+    cell_6.move();
+    cell_7.show();
+    cell_7.move();
+    cell_8.show();
+    cell_8.move();
+
+    //check if circles are out of screen
+    if(start3 == true && cell_5.y >= height + 60 && cell_5.x >= width + 60) {
+
+      //re-initialize all relevant (to loop) variables (so everything play a second time)
+      bg = true;
+      n = 0;
+      frame1 = true;
+      frame2 = false;
+      frame3 = false;
+      start1 = false;
+      start2 = false;
+      start3 = false;
+      cell_1.x = 0;
+      cell_2.x = width;
+      cell_3.y = 0;
+      cell_4.y = 800;
+      cell_5.x = 0;
+      cell_6.x = 0;
+      cell_7.x = 1200;
+      cell_8.x = 1200;
+      cell_5.y = 0;
+      cell_6.y = 800;
+      cell_7.y = 800;
+      cell_8.y = 0;
+
+    }
+  }
 }
+
+
+
+
+
 
 // ---------------1ST COLLISION-------------------
 function phase(){
   //background(0,0);// --> pattern_2 still not seen
   if (cell_1.collides(cell_2)){
     //red,g,b,sizeX,sizeY,f_rate
-      planets.display(255,128,0,200,200,4);
-      cell_1.vx = 2;
-      cell_2.vx = -2;
-
+      planets.display(255,128,0,200,200,10);
+      cell_1.vx = 1;
+      cell_2.vx = -1;
+      //if cells have collided
+      start1 = true;
   } else {
     cell_1.vx = 3;
     cell_2.vx = -3;
+    frameRate(60);
   }
 
 // ---------------2ND COLLISION-------------------
@@ -104,21 +172,21 @@ function phase(){
 
     // PATTERNS
       if (cell_3.collides(cell_4) === 1){
-        planets.display(255,0,0,250,250,4);
+        planets.display(255,0,0,250,250,10);
       }
 
       if (cell_3.collides(cell_4) === 2){
-        planets.display(255,80,0,230,230,4);
+        planets.display(255,77,0,230,230,10);
       }
 
     if (cell_3.collides(cell_4) === 3){
         //third pattern
-        planets.display(255,94,0,210,210,4);
+        planets.display(255,120,0,210,210,10);
       }
 
-    cell_3.vy = 4;
-    cell_4.vy = -4
-
+    cell_3.vy = 2;
+    cell_4.vy = -2;
+    start2 = true;
   } else {
     cell_3.vy = 5;
     cell_4.vy = -5;
@@ -126,6 +194,7 @@ function phase(){
 
 // ---------------FINAL COLLISION-------------------
   if (cell_5.collides(cell_7)){
+        bg = false
 
     // PATTERNS
       if (cell_5.collides(cell_7) === 1){
@@ -133,18 +202,16 @@ function phase(){
       }
 
       if (cell_5.collides(cell_7) === 2){
-        //background(255); doesn't work
+
         pattern_2();
-        //planets.display(255,0,0,250,250,10);
+        start3 = true;
       }
 
     if (cell_5.collides(cell_7) === 3){
         //third pattern
-        planets.display(255,0,0,250,250,10);
-        //background(0,0,255);
+        planets.display(255,0,0,250,250,40);
       }
-    //print('hello');
-    //frameRate(15); changes the other frameRate stored up there ^^
+    bg = false;
     cell_5.vx = 0.3;
     cell_6.vx = 0.3;
     cell_7.vx = -0.3;
@@ -155,7 +222,7 @@ function phase(){
     cell_8.vy = 0.3;
 
   } else {
-    //frameRate(15); slows down entire equation
+    bg =true;
     cell_5.vx = 6;
     cell_6.vx = 6;
     cell_7.vx = -6;
@@ -168,10 +235,11 @@ function phase(){
 
 }
 
-/*------------OTHER FUNCTIONS -------------------------------*/
+//------------OTHER FUNCTIONS AND CLASSES -------------------------
 
 function pattern_1(){
   for (let i = 0; i < 500; i++) {
+      noStroke();
       fill(random(255),random(255));
       //fill(random(255), random(255), random(255), random(255)); -- >rainbow
       ellipse(random(width), random(height), random(100));
@@ -183,7 +251,7 @@ function pattern_1(){
 function pattern_2(){
   background(200,100,0,20);
   for (i=1; i<100; i++){
-    let a = n * 137.5; // 137.3 // 137.6
+    let a = n * 137.5;
     let l = c * sqrt(n)*2;
 
     let g = l * cos(a) + width/2;
@@ -209,9 +277,7 @@ function pattern_2(){
 }
 
 
-
 class Branch {
-
   constructor(x,y,vx,vy,r = 60){
     this.x = x;
     this.y = y;
@@ -247,32 +313,25 @@ class Branch {
 
 }
 
-/*NOT WORKING :c
-function frame_2(){
-  cell_3.show();
-  cell_4.show();
-  cell_3.move();
-  cell_4.move();
-}*/
-
 
 class Planets{
   contructor(){
-//IDK IF I NEED THIS D:
+  //IDK IF I NEED THIS D:
   }
 
-display(red,g,b,sizeX,sizeY,f_rate){ //variables to change sun in the collision
+display(red,g,b,sizeX,sizeY,f_rate = 60){ //variables to change sun in the collision
   background(0);
 
   //STARS
     for(let i = 0; i<stars; i++){
       let randomX = random(width);
       let randomY = random(height);
-      //let randomO = random(1,2); //not working
+      let randomO = random(50,130);
       fill(255);
-     ellipse(randomX,randomY,random(0.1,0.8),random(0.1,0.8));
+      noStroke();
+     ellipse(randomX,randomY,random(0.5,2),random(0.5,2));
   }
-    frameRate(f_rate); //7
+    frameRate(f_rate);
 
     noStroke();
 
@@ -392,7 +451,6 @@ display(red,g,b,sizeX,sizeY,f_rate){ //variables to change sun in the collision
     ellipse(random(193,195),195,90,90);
     fill(0,180,255);
     ellipse(random(187,190),192,75,75);
-}
-
+ }
 
 }
